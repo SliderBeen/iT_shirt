@@ -64,7 +64,13 @@
 
 - (IBAction)doClick:(UIButton *)btn
 {
-
+    if (btn.tag == 10) {
+        
+    } else if (btn.tag == 11) {
+    
+    } else if (btn.tag == 12) {
+    
+    }
 }
 
 #pragma mark - Navigation
