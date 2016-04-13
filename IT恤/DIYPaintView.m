@@ -13,6 +13,7 @@
 @property (nonatomic, strong) NSMutableArray *pasteImageArray;
 @property (nonatomic, strong) NSMutableArray *pathsArray;
 @property (nonatomic, strong) UIBezierPath *bezier;
+@property (nonatomic, assign) CGFloat lineWidth;
 
 @end
 
@@ -22,9 +23,14 @@
 {
     self = [super initWithFrame:frame];
     if (self) {
-        
+        _lineWidth = 1.0f;
     }
     return self;
+}
+
+- (void)awakeFromNib
+{
+    _lineWidth = 1.0f;
 }
 
 - (NSMutableArray *)pasteImageArray
@@ -55,13 +61,18 @@
 - (void)addPasteImage:(UIImage *)pasteImage
 {
     NSAssert(pasteImage != nil, @"pasteImage 不能为空");
-    
-    UIImageView *imageView = [[UIImageView alloc] initWithImage:pasteImage];
-    imageView.userInteractionEnabled = YES;
-    UIPanGestureRecognizer *pan = [[UIPanGestureRecognizer alloc] initWithTarget:self action:@selector(changePosition:)];
-    [imageView addGestureRecognizer:pan];
-    [self addSubview:imageView];
-    [self.pasteImageArray addObject:imageView];
+    if (self.pasteImageArray.count) {
+        UIImageView *lastImage = self.pasteImageArray.lastObject;
+        lastImage.image = pasteImage;
+    } else {
+        UIImageView *imageView = [[UIImageView alloc] initWithFrame:CGRectMake(0, 0, 50, 80)];
+        imageView.image = pasteImage;
+        imageView.userInteractionEnabled = YES;
+        UIPanGestureRecognizer *pan = [[UIPanGestureRecognizer alloc] initWithTarget:self action:@selector(changePosition:)];
+        [imageView addGestureRecognizer:pan];
+        [self addSubview:imageView];
+        [self.pasteImageArray addObject:imageView];
+    }
 }
 
 - (void)changePosition:(UIPanGestureRecognizer *)reg
@@ -78,6 +89,7 @@
 
     UIBezierPath *bezier = [UIBezierPath bezierPath];
     _bezier = bezier;
+    [bezier setLineWidth:self.lineWidth];
     [bezier moveToPoint:point];
     [self.pathsArray addObject:bezier];
 }
@@ -91,6 +103,27 @@
     [self setNeedsDisplay];
 }
 
+- (void)eraser
+{
+    if (self.pathsArray.count > 1) {
+        [self.pathsArray removeLastObject];
+    } else {
+        if (self.pasteImageArray.count) {
+            UIImageView *imageView = self.pasteImageArray.lastObject;
+            [imageView removeFromSuperview];
+            [self.pasteImageArray removeLastObject];
+        }
+    }
+
+    [self setNeedsDisplay];
+}
+
+- (void)setPenWidth:(CGFloat)lineWidth
+{
+    _lineWidth = lineWidth;
+    [self setNeedsDisplay];
+}
+
 // Only override drawRect: if you perform custom drawing.
 // An empty implementation adversely affects performance during animation.
 - (void)drawRect:(CGRect)rect {
@@ -98,6 +131,7 @@
     if (!self.pathsArray.count) {
         return;
     }
+    
     for (UIBezierPath *path in self.pathsArray) {
         if ([path isKindOfClass:[UIImage class]]) {
             UIImage *image = (UIImage *)path;

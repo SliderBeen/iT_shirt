@@ -19,4 +19,8 @@
  */
 - (void)addPasteImage:(UIImage *)image;
 
+- (void)eraser;
+
+- (void)setPenWidth:(CGFloat)lineWidth;
+
 @end

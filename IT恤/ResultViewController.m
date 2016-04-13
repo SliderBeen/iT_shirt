@@ -46,6 +46,17 @@
     }
 }
 
+//- (BOOL)shouldAutorotate
+//{
+//    return YES;
+//}
+//
+//- (UIInterfaceOrientationMask)supportedInterfaceOrientations
+//{
+//    return UIInterfaceOrientationMaskPortrait;
+//}
+
+
 /*
 #pragma mark - Navigation
 
